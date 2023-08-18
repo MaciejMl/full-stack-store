@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User, Cart, ProdAndCart, Product } from '@prisma/client';
+import { User, Cart } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -32,8 +36,19 @@ export class CartService {
       throw new NotFoundException('Product not found');
     }
 
-    const cart = await this.getUserCart(user);
+    const cart = await this.prismaService.cart.findUnique({
+      where: { userId: user.id },
+      include: {
+        products: true,
+      },
+    });
 
+    const productInCart = cart.products.find(
+      (item) => item.productId === productId,
+    );
+    if (productInCart) {
+      throw new ConflictException('Product is already in the cart');
+    }
     await this.prismaService.prodAndCart.create({
       data: {
         productId,
@@ -58,7 +73,16 @@ export class CartService {
       throw new NotFoundException('Product not found');
     }
 
-    const cart = await this.getUserCart(user);
+    const cart = await this.prismaService.cart.findUnique({
+      where: { userId: user.id },
+      include: {
+        products: true,
+      },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
 
     const cartItem = cart.products.find((item) => item.productId === productId);
 
@@ -69,11 +93,13 @@ export class CartService {
     await this.prismaService.prodAndCart.update({
       where: {
         productId_cartId: {
-          productId,
+          productId: cartItem.productId,
           cartId: cart.id,
         },
       },
-      data: { quantity },
+      data: {
+        quantity: quantity,
+      },
     });
 
     return this.getUserCart(user);

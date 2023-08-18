@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Request,
+  Put,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -26,16 +27,16 @@ export class CartController {
     return this.cartService.addToCart(req.user, productId);
   }
 
-  @Post('/update/:productId')
+  @Put('/update/:productId')
   updateCartItemQuantity(
     @Request() req,
     @Param('productId') productId: string,
-    @Body() quantity: number,
+    @Body() body: { quantity: number },
   ) {
     return this.cartService.updateCartItemQuantity(
       req.user,
       productId,
-      quantity,
+      body.quantity,
     );
   }
 

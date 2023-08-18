@@ -13,50 +13,69 @@ enum Role {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  name     String
-  surname  String
-  email    String    @unique
-  role     Role      @default(USER)
-  password Password?
-  cart     Cart?
+  id        String   @id @default(uuid())
+  name      String
+  surname   String
+  email     String   @unique
+  role      Role     @default(USER)
+  password  Password?
+  cart      Cart?
+  orders    Order[]
 }
 
 model Password {
-  id       String @id @default(uuid())
+  id             String  @id @default(uuid())
   hashedPassword String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String  @unique
 }
 
 model Product {
-  id            String @id @default(uuid())
-  name          String
-  price         Int
-  type          String
-  image         String
-  description   String
-  
-  carts          ProdAndCart[]
+  id          String   @id @default(uuid())
+  name        String
+  price       Int
+  type        String
+  image       String
+  description String
+  carts       ProdAndCart[]
+  orderItems  OrderItem[]
 }
 
 model Cart {
-  id            String @id @default(uuid())
-  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String @unique
-
-  products      ProdAndCart[]
-  
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  id        String       @id @default(uuid())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String       @unique
+  products  ProdAndCart[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 model ProdAndCart {
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
   productId String
-  cart   Cart @relation(fields: [cartId], references: [id])
-  cartId String
-  quantity Int
-  
+  cart      Cart      @relation(fields: [cartId], references: [id])
+  cartId    String
+  quantity  Int
+
   @@id([productId, cartId])
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  products  OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id         String    @id @default(uuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id])
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id])
+  quantity   Int
 }

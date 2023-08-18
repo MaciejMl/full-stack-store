@@ -28,7 +28,16 @@ export class OrdersService {
   }
 
   async placeOrder(user: User): Promise<Order> {
-    const cart = await this.getLatestCart(user);
+    const cart = await this.prismaService.cart.findUnique({
+      where: { userId: user.id },
+      include: {
+        products: true,
+      },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
 
     const order = await this.prismaService.order.create({
       data: {
@@ -48,18 +57,6 @@ export class OrdersService {
     await this.clearCart(cart);
 
     return order;
-  }
-
-  private async getLatestCart(user: User): Promise<Cart> {
-    return this.prismaService.cart.findFirst({
-      where: { userId: user.id },
-      include: {
-        products: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
   }
 
   private async clearCart(cart: Cart): Promise<void> {
