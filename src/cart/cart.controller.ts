@@ -23,25 +23,39 @@ export class CartController {
   }
 
   @Post('/add/:productId')
-  addToCart(@Request() req, @Param('productId') productId: string) {
-    return this.cartService.addToCart(req.user, productId);
+  addToCart(
+    @Request() req,
+    @Param('productId') productId: string,
+    description: string,
+  ) {
+    return this.cartService.addToCart(req.user, productId, description);
   }
 
   @Put('/update/:productId')
   updateCartItemQuantity(
     @Request() req,
     @Param('productId') productId: string,
-    @Body() body: { quantity: number },
+    @Body()
+    body: {
+      quantity: number;
+      description: string;
+    },
   ) {
     return this.cartService.updateCartItemQuantity(
       req.user,
       productId,
       body.quantity,
+      body.description,
     );
   }
 
   @Delete('/remove/:productId')
   removeFromCart(@Request() req, @Param('productId') productId: string) {
     return this.cartService.removeFromCart(req.user, productId);
+  }
+
+  @Get('/description/:productId')
+  getProductDescription(@Request() req, @Param('productId') productId: string) {
+    return this.cartService.getProductDescription(req.user, productId);
   }
 }

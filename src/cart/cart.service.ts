@@ -27,7 +27,11 @@ export class CartService {
     return cart;
   }
 
-  async addToCart(user: User, productId: string): Promise<Cart> {
+  async addToCart(
+    user: User,
+    productId: string,
+    description: string,
+  ): Promise<Cart> {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
     });
@@ -54,6 +58,7 @@ export class CartService {
         productId,
         cartId: cart.id,
         quantity: 1,
+        description: description,
       },
     });
 
@@ -64,6 +69,7 @@ export class CartService {
     user: User,
     productId: string,
     quantity: number,
+    description: string,
   ): Promise<Cart> {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
@@ -99,6 +105,7 @@ export class CartService {
       },
       data: {
         quantity: quantity,
+        description: description,
       },
     });
 
@@ -129,5 +136,35 @@ export class CartService {
         products: true,
       },
     });
+  }
+
+  async getProductDescription(
+    user: User,
+    productId: string,
+  ): Promise<string | null> {
+    const cart = await this.prismaService.cart.findUnique({
+      where: { userId: user.id },
+      include: {
+        products: {
+          where: {
+            productId: productId,
+          },
+        },
+      },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+
+    const productInCart = cart.products.find(
+      (item) => item.productId === productId,
+    );
+
+    if (!productInCart) {
+      throw new NotFoundException('Product not found in cart');
+    }
+
+    return productInCart.description || null;
   }
 }
