@@ -19,7 +19,9 @@ export class AuthService {
       email: registrationData.email,
       name: registrationData.name,
       surname: registrationData.surname,
+      cart: '',
     };
+
     return this.usersService.create(userData, hashedPassword);
   }
 

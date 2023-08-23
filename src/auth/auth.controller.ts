@@ -26,7 +26,7 @@ export class AuthController {
   async login(@Request() req, @Response() res) {
     const tokens = await this.authService.createSession(req.user);
     res.cookie('auth', tokens, { httpOnly: true });
-    res.send({
+    res.status(200).send({
       message: 'success',
     });
   }
@@ -35,7 +35,7 @@ export class AuthController {
   @Delete('logout')
   async logout(@Response() res) {
     res.clearCookie('auth', { httpOnly: true });
-    res.send({
+    res.status(200).send({
       message: 'success',
     });
   }

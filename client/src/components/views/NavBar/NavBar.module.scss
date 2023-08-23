@@ -1,0 +1,6 @@
+.navbar::before {
+  content: '|';
+  color: white;
+  margin-right: 8px;
+  margin-bottom: -1px;
+}

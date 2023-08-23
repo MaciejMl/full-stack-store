@@ -15,9 +15,14 @@ import { ConfigModule } from '@nestjs/config';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import configuration from './config/configuration';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../../', 'client', 'build'),
+    }),
     UsersModule,
     AuthModule,
     ProductsModule,
@@ -34,9 +39,16 @@ import configuration from './config/configuration';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(cors()).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL,
-    });
+    consumer
+      .apply(
+        cors({
+          // origin: 'http://localhost:3000',
+          credentials: true,
+        }),
+      )
+      .forRoutes({
+        path: '*',
+        method: RequestMethod.ALL,
+      });
   }
 }

@@ -1,6 +1,6 @@
 const initialState = {
   products: [],
-  // user: null,
+  users: null,
 };
 
 export default initialState;
